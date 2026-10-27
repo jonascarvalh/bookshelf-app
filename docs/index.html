@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light} body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
+<title>Estante</title>
+<meta name="description" content="Estante: app Flutter para buscar livros na Open Library, escanear o ISBN e acompanhar a leitura, mesmo offline.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: uma prateleira. Seções empilhadas como tábuas; lombadas de livro como assinatura visual. */
+:root {
+  --paper: #EDEFE9;      /* papel com leve tom de sálvia */
+  --card: #FBFCF9;
+  --ink: #17201B;
+  --muted: #55625A;
+  --line: #D3D9CF;
+  --cloth: #2E5E4E;      /* verde de capa de livro, o mesmo do app */
+  --cloth-ink: #FFFFFF;
+  --gilt: #A86E14;       /* dourado de lombada: destaques e o estado "Lendo" */
+  --board: #C9B79A;      /* tábua da prateleira */
+  --board-edge: #A8946F;
+  --frame: #131815;
+  --sticker: #FFFFFF;    /* etiqueta do código de barras: sempre branca */
+  --bar: #111111;
+  --ok: #2F7A4F;
+  --bad: #B3362B;
+  --sp-1: #2E5E4E; --sp-2: #7A3E2E; --sp-3: #34495E; --sp-4: #8C6D1F; --sp-5: #5B3F6B; --sp-6: #3E5A3A;
+
+  --f-display: "Big Shoulders Display", "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
+  --f-body: "Hanken Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --s-xs: .8125rem; --s-sm: .9375rem; --s-md: 1.0625rem; --s-lg: 1.375rem;
+  --s-xl: clamp(2rem, 4.4vw, 3rem); --s-hero: clamp(3.1rem, 8.2vw, 6.2rem);
+  --radius: 14px;
+  --wrap: 1140px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1311; --card: #161B18; --ink: #E7ECE5; --muted: #9AA79F; --line: #27302B;
+    --cloth: #7FC4A8; --cloth-ink: #0D1A14; --gilt: #E8B86A; --board: #3A3127; --board-edge: #2A231C;
+    --frame: #040605; --ok: #6FCB94; --bad: #F08A7E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1311; --card: #161B18; --ink: #E7ECE5; --muted: #9AA79F; --line: #27302B;
+  --cloth: #7FC4A8; --cloth-ink: #0D1A14; --gilt: #E8B86A; --board: #3A3127; --board-edge: #2A231C;
+  --frame: #040605; --ok: #6FCB94; --bad: #F08A7E;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--f-body); font-size: var(--s-md); line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--gilt); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+
+.wrap {
+  max-width: var(--wrap); margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.eyebrow {
+  font-family: var(--f-mono); font-size: var(--s-xs); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted);
+}
+.mono { font-family: var(--f-mono); }
+
+/* ── Cabeçalho ───────────────────────────────── */
+.top { padding-block: 22px; }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand-mark { display: flex; align-items: flex-end; gap: 2px; height: 26px; }
+.brand-mark i { display: block; width: 6px; border-radius: 1.5px; }
+.brand-mark i:nth-child(1) { height: 22px; background: var(--cloth); }
+.brand-mark i:nth-child(2) { height: 26px; background: var(--gilt); }
+.brand-mark i:nth-child(3) { height: 18px; background: var(--muted); transform: rotate(12deg); transform-origin: bottom left; margin-left: 2px; }
+.brand b { font-family: var(--f-display); font-weight: 800; font-size: 1.6rem; letter-spacing: .02em; text-transform: uppercase; }
+.nav { display: flex; gap: 20px; flex-wrap: wrap; font-size: var(--s-sm); }
+.nav a { text-decoration: none; color: var(--muted); }
+.nav a:hover { color: var(--ink); }
+
+/* ── Hero ────────────────────────────────────── */
+.hero { padding-block: 28px 0; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 40px; align-items: center; }
+.hero-copy { display: grid; gap: 22px; min-width: 0; }
+.hero h1 {
+  font-family: var(--f-display); font-weight: 900; font-size: var(--s-hero); line-height: .92;
+  text-transform: uppercase; letter-spacing: .005em;
+}
+.hero h1 em { font-style: normal; color: var(--cloth); }
+.lede { font-size: var(--s-lg); line-height: 1.5; color: var(--muted); max-width: 34ch; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; padding: 13px 20px; border-radius: 999px;
+  font-weight: 600; font-size: var(--s-sm); text-decoration: none; border: 1.5px solid var(--ink);
+  transition: transform .15s ease, background-color .15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.api-note { font-size: var(--s-xs); color: var(--muted); }
+.api-note a { text-underline-offset: 3px; }
+
+.phones { position: relative; display: flex; justify-content: center; padding-block: 10px 0; min-width: 0; }
+.phone {
+  width: min(290px, 66vw); max-width: 100%; flex: none;
+  border: 8px solid var(--frame); border-radius: 38px; overflow: hidden; background: var(--frame);
+  box-shadow: 0 34px 60px -34px rgba(10, 20, 15, .55);
+}
+.phone img { display: block; width: 100%; height: auto; }
+.phone img.only-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .phone img.only-dark { display: block; }
+  :root:not([data-theme="light"]) .phone img.only-light { display: none; }
+}
+:root[data-theme="dark"] .phone img.only-dark { display: block; }
+:root[data-theme="dark"] .phone img.only-light { display: none; }
+.phones .phone.front { position: relative; z-index: 1; transform: translateX(-30px) rotate(-2.5deg); }
+.phones .phone.back {
+  position: absolute; width: min(240px, 54vw); right: 2%; top: 60px; transform: rotate(4deg); z-index: 0;
+}
+
+/* ── Prateleira de lombadas ──────────────────── */
+.shelf { margin-top: 36px; position: relative; z-index: 2; }
+.shelf .wrap { display: grid; gap: 10px; }
+.spines {
+  display: flex; align-items: flex-end; gap: 4px; height: 210px; padding-inline: 6px;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+}
+.spines::-webkit-scrollbar { display: none; }
+.spine {
+  --h: 190px; --w: 44px;
+  position: relative; flex: none; width: var(--w); height: var(--h);
+  background: var(--c); color: #F3EFE6; border-radius: 3px 3px 1px 1px;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 12px 0 10px;
+  box-shadow: inset -6px 0 10px -6px rgba(0,0,0,.45), inset 4px 0 6px -4px rgba(255,255,255,.18);
+  animation: rise .6s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * 45ms);
+}
+.spine::before, .spine::after {
+  content: ""; position: absolute; left: 6px; right: 6px; height: 2px; background: rgba(243,239,230,.45);
+}
+.spine::before { top: 8px; } .spine::after { bottom: 34px; }
+.spine b {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font-family: var(--f-display); font-weight: 800; font-size: 1.02rem; letter-spacing: .04em; text-transform: uppercase;
+  line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-height: calc(var(--h) - 58px);
+}
+.spine small { font-family: var(--f-mono); font-size: .58rem; opacity: .8; letter-spacing: .04em; }
+.spine.reading .ribbon {
+  position: absolute; top: -2px; right: 8px; width: 9px; height: 46px; background: var(--gilt);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+}
+.spine.leaning { transform-origin: bottom right; transform: rotate(-7deg); margin-left: 14px; animation: none; }
+.board {
+  height: 16px; border-radius: 3px; background: var(--board);
+  box-shadow: 0 6px 0 var(--board-edge), 0 18px 28px -14px rgba(0,0,0,.4);
+}
+.shelf-legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: var(--s-xs); color: var(--muted); padding-top: 10px; }
+.shelf-legend span { display: inline-flex; align-items: center; gap: 8px; }
+.shelf-legend .key-ribbon { width: 8px; height: 14px; background: var(--gilt); clip-path: polygon(0 0,100% 0,100% 100%,50% 78%,0 100%); }
+@keyframes rise { from { transform: translateY(14px); } to { transform: translateY(0); } }
+
+/* ── Fatos ───────────────────────────────────── */
+.facts { padding-block: 56px 8px; }
+.facts .wrap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
+.fact { display: grid; gap: 4px; padding: 4px 22px; border-left: 1px solid var(--line); min-width: 0; }
+.fact:first-child { border-left: 0; padding-left: 0; }
+.fact b { font-family: var(--f-display); font-weight: 800; font-size: 2.1rem; line-height: 1; text-transform: uppercase; }
+.fact span { font-size: var(--s-sm); color: var(--muted); }
+
+/* ── Seções de funcionalidade ────────────────── */
+.feature { padding-block: 88px; }
+.feature + .feature { border-top: 1px solid var(--line); }
+.feature .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.feature.flip .media { order: -1; }
+.copy { display: grid; gap: 18px; min-width: 0; align-content: start; }
+.copy h2 {
+  font-family: var(--f-display); font-weight: 800; font-size: var(--s-xl); line-height: 1; text-transform: uppercase;
+}
+.copy > p { color: var(--muted); max-width: 52ch; }
+.points { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.points li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; align-items: start; }
+.points li::before {
+  content: ""; width: 10px; height: 16px; margin-top: 5px; background: var(--cloth);
+  clip-path: polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);
+}
+.points b { font-weight: 600; }
+.media { display: flex; justify-content: center; gap: 20px; min-width: 0; }
+.media .phone { width: min(280px, 72vw); }
+.media.pair .phone { width: min(250px, 42vw); }
+.media.pair .phone:last-child { margin-top: 56px; }
+
+/* ── Demo de ISBN ────────────────────────────── */
+.isbn-demo {
+  display: grid; gap: 14px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--card);
+}
+.isbn-demo label { font-size: var(--s-xs); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.isbn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.isbn-row input {
+  flex: 1 1 220px; min-width: 0; font-family: var(--f-mono); font-size: 1.05rem; padding: 11px 14px;
+  border: 1.5px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink);
+}
+.isbn-row input:focus { border-color: var(--cloth); outline: none; }
+.chip-btn {
+  font: 500 var(--s-xs)/1 var(--f-mono); padding: 8px 10px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--muted);
+}
+.chip-btn:hover { color: var(--ink); border-color: var(--muted); }
+.isbn-status { font-weight: 600; font-size: var(--s-sm); display: flex; align-items: center; gap: 8px; }
+.isbn-status.ok { color: var(--ok); } .isbn-status.bad { color: var(--bad); }
+.sticker {
+  background: var(--sticker); border-radius: 6px; padding: 12px 16px 8px; justify-self: start; max-width: 100%;
+  box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 10px 22px -16px rgba(0,0,0,.5);
+}
+.sticker svg { display: block; width: 260px; max-width: 100%; height: auto; }
+.math { font-family: var(--f-mono); font-size: var(--s-xs); color: var(--muted); overflow-x: auto; white-space: nowrap; padding-bottom: 2px; }
+.math mark { background: transparent; color: var(--gilt); font-weight: 500; }
+.deeplink { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: var(--s-xs); color: var(--muted); }
+.deeplink code { font-family: var(--f-mono); color: var(--ink); user-select: all; overflow-wrap: anywhere; }
+
+/* ── Simulador de cache ──────────────────────── */
+.sim { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); }
+.scenarios { display: flex; flex-wrap: wrap; gap: 8px; }
+.scenario {
+  font: 600 var(--s-xs)/1.2 var(--f-body); padding: 9px 12px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+}
+.scenario[aria-pressed="true"] { background: var(--cloth); border-color: var(--cloth); color: var(--cloth-ink); }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.timeline li {
+  display: grid; grid-template-columns: 68px 76px minmax(0, 1fr); gap: 12px; align-items: baseline;
+  padding-block: 10px; border-top: 1px dashed var(--line);
+}
+.timeline li:first-child { border-top: 0; }
+.timeline time { font-family: var(--f-mono); font-size: var(--s-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.origin {
+  font: 500 .72rem/1 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; padding: 5px 7px; border-radius: 6px;
+  justify-self: start; border: 1px solid currentColor;
+}
+.origin.cache { color: var(--gilt); } .origin.api { color: var(--cloth); } .origin.erro { color: var(--bad); } .origin.nada { color: var(--muted); }
+.timeline p { font-size: var(--s-sm); }
+.sim-note { font-size: var(--s-xs); color: var(--muted); }
+
+/* ── Galeria ─────────────────────────────────── */
+.gallery { padding-block: 80px 88px; border-top: 1px solid var(--line); }
+.gallery .wrap { display: grid; gap: 22px; }
+.gallery h2 { font-family: var(--f-display); font-weight: 800; font-size: var(--s-xl); line-height: 1; text-transform: uppercase; }
+.strip { display: flex; gap: 18px; overflow-x: auto; padding-bottom: 14px; scroll-snap-type: x proximity; }
+.strip figure { margin: 0; flex: none; width: 200px; display: grid; gap: 10px; scroll-snap-align: start; }
+.strip img { width: 100%; height: auto; border-radius: 18px; border: 5px solid var(--frame); display: block; }
+.strip figcaption { font-size: var(--s-xs); color: var(--muted); }
+
+/* ── Rodapé ──────────────────────────────────── */
+.foot { border-top: 1px solid var(--line); padding-block: 28px; }
+.foot .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px 24px; flex-wrap: wrap; font-size: var(--s-sm); color: var(--muted); }
+.foot .credits a { color: var(--ink); font-weight: 600; }
+.foot-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.foot-links a { color: var(--muted); text-decoration: none; }
+.foot-links a:hover { color: var(--ink); }
+/* Utilitários do link de crédito (mesmos nomes de classe do Tailwind, sem carregá-lo) */
+.underline { text-decoration-line: underline; }
+.decoration-transparent { text-decoration-color: transparent; }
+.underline-offset-4 { text-underline-offset: 4px; }
+.transition-\[text-decoration-color\] { transition-property: text-decoration-color; transition-duration: .15s; transition-timing-function: cubic-bezier(.4, 0, .2, 1); }
+.hover\:decoration-current:hover { text-decoration-color: currentColor; }
+
+/* ── Responsivo ──────────────────────────────── */
+@media (max-width: 880px) {
+  .hero .wrap, .feature .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .feature.flip .media { order: 0; }
+  .phones .phone.front { transform: translateX(-18%) rotate(-2.5deg); }
+  .phones .phone.back { right: 4%; }
+  .shelf { margin-top: 28px; }
+  .facts .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 22px; }
+  .fact:nth-child(3) { border-left: 0; padding-left: 0; }
+  .feature { padding-block: 64px; }
+}
+@media (max-width: 480px) {
+  .spines { height: 170px; }
+  .spine { --h: 150px !important; --w: 36px !important; }
+  .spine b { font-size: .86rem; }
+  .media.pair .phone { width: min(200px, 44vw); }
+  .media.pair .phone:last-child { margin-top: 36px; }
+  .timeline li { grid-template-columns: 54px minmax(0, 1fr); }
+  .timeline li p { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spine { animation: none; }
+  .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#inicio" aria-label="Estante, início">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <b>Estante</b>
+    </a>
+    <nav class="nav" aria-label="Seções">
+      <a href="#busca">Busca</a>
+      <a href="#scanner">Scanner</a>
+      <a href="#offline">Offline</a>
+      <a href="#leitura">Leitura</a>
+      <a href="https://github.com/jonascarvalh/bookshelf-app" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <span class="eyebrow">App Flutter · dados da Open Library</span>
+        <h1>Sua estante no bolso, <em>mesmo sem internet</em></h1>
+        <p class="lede">Busque livros, escaneie o código de barras de um exemplar físico e acompanhe a leitura página por página. O que você já viu fica salvo no aparelho.</p>
+        <div class="ctas">
+          <a class="btn primary" href="https://github.com/jonascarvalh/bookshelf-app/releases" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+            Baixar o APK
+          </a>
+          <a class="btn ghost" href="https://github.com/jonascarvalh/bookshelf-app" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>
+            Código no GitHub
+          </a>
+        </div>
+        <p class="api-note">Usa a <a href="https://openlibrary.org/developers/api" target="_blank" rel="noopener noreferrer">API pública da Open Library</a>: gratuita, sem chave e sem cadastro.</p>
+      </div>
+      <div class="phones">
+        <div class="phone front">
+          <img class="only-light" src="img/shelf-light.webp" width="640" height="1386" alt="Tela Minha estante com três livros em leitura e o progresso de cada um">
+          <img class="only-dark" src="img/shelf-dark.webp" width="640" height="1386" alt="Tela Minha estante no tema escuro">
+        </div>
+        <div class="phone back">
+          <img class="only-light" src="img/search-light.webp" width="640" height="1386" alt="Busca por Machado de Assis com 1.406 resultados e capas">
+          <img class="only-dark" src="img/search-dark.webp" width="640" height="1386" alt="Busca no tema escuro">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shelf" aria-label="A estante usada nas capturas de tela">
+    <div class="wrap">
+      <div class="spines" role="list">
+        <div class="spine reading" role="listitem" style="--c: var(--sp-4); --h: 196px; --w: 48px; --i: 0"><span class="ribbon"></span><b>Dom Casmurro</b><small>1899</small></div>
+        <div class="spine reading" role="listitem" style="--c: var(--sp-3); --h: 168px; --w: 38px; --i: 1"><span class="ribbon"></span><b>A Hora da Estrela</b><small>1977</small></div>
+        <div class="spine reading" role="listitem" style="--c: var(--sp-2); --h: 182px; --w: 42px; --i: 2"><span class="ribbon"></span><b>Vidas secas</b><small>1938</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-1); --h: 200px; --w: 52px; --i: 3"><b>Memórias póstumas de Brás Cubas</b><small>1881</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-6); --h: 160px; --w: 34px; --i: 4"><b>O Alienista</b><small>1882</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-5); --h: 188px; --w: 46px; --i: 5"><b>Quincas Borba</b><small>1891</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-2); --h: 176px; --w: 40px; --i: 6"><b>A paixão segundo G.H.</b><small>1964</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-3); --h: 150px; --w: 32px; --i: 7"><b>Água viva</b><small>1973</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-4); --h: 186px; --w: 44px; --i: 8"><b>Iaiá Garcia</b><small>1878</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-1); --h: 172px; --w: 40px; --i: 9"><b>Memorial de Aires</b><small>1908</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-5); --h: 192px; --w: 46px; --i: 10"><b>São Bernardo</b><small>1934</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-6); --h: 164px; --w: 38px; --i: 11"><b>Laços de família</b><small>1960</small></div>
+        <div class="spine" role="listitem" style="--c: var(--sp-2); --h: 180px; --w: 42px; --i: 12"><b>Esaú e Jacó</b><small>1904</small></div>
+        <div class="spine leaning" role="listitem" style="--c: var(--sp-3); --h: 170px; --w: 40px; --i: 13"><b>Helena</b><small>1876</small></div>
+      </div>
+      <div class="board" aria-hidden="true"></div>
+      <div class="shelf-legend">
+        <span><i class="key-ribbon" aria-hidden="true"></i>Fita dourada: lendo agora (3)</span>
+        <span>Quero ler: 4</span>
+        <span>Lidos este ano: 7 de 15</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="Em números">
+    <div class="wrap">
+      <div class="fact"><b>0 chaves</b><span>API aberta da Open Library</span></div>
+      <div class="fact"><b>3 prateleiras</b><span>Quero ler, Lendo e Lido</span></div>
+      <div class="fact"><b>62 testes</b><span>unidade, widget e integração</span></div>
+      <div class="fact"><b>APK</b><span>gerado pelo CI a cada versão</span></div>
+    </div>
+  </section>
+
+  <section class="feature" id="busca">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">Busca</span>
+        <h2>Role até o fim do catálogo</h2>
+        <p>Digite um título ou autor e os resultados aparecem quando você para de digitar. A próxima página chega antes de você alcançar o fim da lista, com as capas baixadas uma vez e guardadas no aparelho.</p>
+        <ul class="points">
+          <li><span><b>Esqueleto enquanto carrega</b>, em vez de uma tela em branco com um círculo girando.</span></li>
+          <li><span><b>Erro só na página seguinte?</b> A lista continua na tela e o rodapé oferece "Tentar de novo".</span></li>
+          <li><span><b>Sem capa na Open Library</b>, o app gera uma com o título e o autor.</span></li>
+          <li><span><b>Nada encontrado</b> vira uma mensagem que sugere buscar pelo autor.</span></li>
+        </ul>
+      </div>
+      <div class="media">
+        <div class="phone">
+          <img class="only-light" src="img/search-light.webp" width="640" height="1386" alt="Resultados da busca por Machado de Assis: Dom Casmurro, Memórias póstumas de Brás Cubas, O Alienista e Quincas Borba" loading="lazy">
+          <img class="only-dark" src="img/search-dark.webp" width="640" height="1386" alt="Resultados da busca no tema escuro" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature flip" id="scanner">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">Leitor de código de barras</span>
+        <h2>Aponte para a contracapa</h2>
+        <p>O scanner só aceita códigos que são mesmo ISBN: prefixo 978 ou 979 e dígito verificador correto. Assim o código de barras do preço ou de outro produto não abre um livro errado. Sem câmera ou sem permissão, dá para digitar.</p>
+        <div class="isbn-demo">
+          <label for="isbn-input">Teste com um ISBN</label>
+          <div class="isbn-row">
+            <input id="isbn-input" inputmode="numeric" autocomplete="off" spellcheck="false" value="978-85-00-50700-7" aria-describedby="isbn-status">
+          </div>
+          <div class="isbn-row" aria-label="Exemplos">
+            <button class="chip-btn" type="button" data-isbn="9788500507007">Dom Casmurro</button>
+            <button class="chip-btn" type="button" data-isbn="9788535914849">13 dígitos</button>
+            <button class="chip-btn" type="button" data-isbn="080442957X">ISBN-10</button>
+            <button class="chip-btn" type="button" data-isbn="7891000100103">EAN de mercado</button>
+          </div>
+          <p class="isbn-status" id="isbn-status" role="status"></p>
+          <div class="sticker" aria-hidden="true"><svg id="barcode" viewBox="0 0 113 66"></svg></div>
+          <p class="math" id="isbn-math"></p>
+          <p class="deeplink">Deep link que abre o livro no app: <code id="deeplink">estante://app/isbn/9788500507007</code> <button class="chip-btn" type="button" id="copy-link">Copiar</button></p>
+        </div>
+      </div>
+      <div class="media">
+        <div class="phone">
+          <img src="img/scanner-dark.webp" width="640" height="1386" alt="Tela do scanner com a moldura sobre o código de barras do ISBN 978-85-00-50700-7 e o botão Digitar ISBN" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature" id="offline">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">Offline-first</span>
+        <h2>Sem internet, sem tela em branco</h2>
+        <p>A tela lê o banco do aparelho, e a API só atualiza esse banco. Livros já vistos, buscas recentes, sinopses, capas e a estante inteira continuam lá no metrô ou no avião. Escolha uma situação para ver o que o app faz.</p>
+        <div class="sim">
+          <div class="scenarios" role="group" aria-label="Situação">
+            <button class="scenario" type="button" data-s="fresh" aria-pressed="true">Busca de há 10 min</button>
+            <button class="scenario" type="button" data-s="stale" aria-pressed="false">Busca de ontem</button>
+            <button class="scenario" type="button" data-s="offline" aria-pressed="false">Sem internet</button>
+            <button class="scenario" type="button" data-s="down" aria-pressed="false">API fora do ar</button>
+            <button class="scenario" type="button" data-s="first" aria-pressed="false">Primeira busca, offline</button>
+          </div>
+          <ol class="timeline" id="timeline" aria-live="polite"></ol>
+          <p class="sim-note">Tempos aproximados. As novas tentativas esperam 600 ms e depois 1,2 s; um erro 404 não é repetido.</p>
+        </div>
+      </div>
+      <div class="media">
+        <div class="phone">
+          <img src="img/offline-light.webp" width="640" height="1386" alt="Busca por Clarice Lispector sem internet: a faixa Sem internet aparece e os resultados mostram Salvo em 24 de out." loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature flip" id="leitura">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">Leitura, meta e lembrete</span>
+        <h2>Página por página</h2>
+        <p>Diga em que página você está e o app registra quanto leu. Chegar à última página move o livro para "Lido". Os registros alimentam as estatísticas e a meta do ano.</p>
+        <ul class="points">
+          <li><span><b>Sinopse da Open Library</b>, limpa do Markdown e salva para ler offline.</span></li>
+          <li><span><b>Livros e páginas por mês</b> nos últimos 6 meses, e a sequência de dias lendo.</span></li>
+          <li><span><b>Meta anual com ritmo</b>: 15 livros dá cerca de 1,3 por mês.</span></li>
+          <li><span><b>Lembrete diário</b> por notificação no horário que você escolher, reagendado se o celular reiniciar.</span></li>
+        </ul>
+      </div>
+      <div class="media pair">
+        <div class="phone">
+          <img class="only-light" src="img/details-light.webp" width="640" height="1386" alt="Página de Dom Casmurro: página 134 de 268, 50%, botão Atualizar progresso e sinopse" loading="lazy">
+          <img class="only-dark" src="img/details-dark.webp" width="640" height="1386" alt="Página do livro no tema escuro" loading="lazy">
+        </div>
+        <div class="phone">
+          <img class="only-light" src="img/stats-light.webp" width="640" height="1386" alt="Estatísticas: meta de 2026 com 7 de 15 livros, 7 dias seguidos, 575 páginas no mês e gráficos por mês" loading="lazy">
+          <img class="only-dark" src="img/stats-dark.webp" width="640" height="1386" alt="Estatísticas no tema escuro" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery" aria-labelledby="gal-title">
+    <div class="wrap">
+      <h2 id="gal-title">Todas as telas</h2>
+      <div class="strip" tabindex="0" aria-label="Capturas de tela do app">
+        <figure><img src="img/shelf-light.webp" width="640" height="1386" alt="Estante, tema claro" loading="lazy"><figcaption>Estante</figcaption></figure>
+        <figure><img src="img/shelf-dark.webp" width="640" height="1386" alt="Estante, tema escuro" loading="lazy"><figcaption>Estante, escuro</figcaption></figure>
+        <figure><img src="img/search-light.webp" width="640" height="1386" alt="Busca, tema claro" loading="lazy"><figcaption>Busca</figcaption></figure>
+        <figure><img src="img/details-light.webp" width="640" height="1386" alt="Detalhes do livro, tema claro" loading="lazy"><figcaption>Detalhes e progresso</figcaption></figure>
+        <figure><img src="img/details-dark.webp" width="640" height="1386" alt="Detalhes do livro, tema escuro" loading="lazy"><figcaption>Detalhes, escuro</figcaption></figure>
+        <figure><img src="img/scanner-dark.webp" width="640" height="1386" alt="Scanner de código de barras" loading="lazy"><figcaption>Scanner</figcaption></figure>
+        <figure><img src="img/offline-light.webp" width="640" height="1386" alt="Busca offline com resultados salvos" loading="lazy"><figcaption>Modo offline</figcaption></figure>
+        <figure><img src="img/stats-light.webp" width="640" height="1386" alt="Estatísticas, tema claro" loading="lazy"><figcaption>Estatísticas</figcaption></figure>
+        <figure><img src="img/stats-dark.webp" width="640" height="1386" alt="Estatísticas, tema escuro" loading="lazy"><figcaption>Estatísticas, escuro</figcaption></figure>
+        <figure><img src="img/goal-light.webp" width="640" height="1386" alt="Meta anual e lembrete diário" loading="lazy"><figcaption>Meta e lembrete</figcaption></figure>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="credits">
+      <p>Desenvolvido por<!-- --> <a href="https://jonascarvalhodev.vercel.app/" target="_blank" rel="noopener noreferrer" class="underline decoration-transparent underline-offset-4 transition-[text-decoration-color] hover:decoration-current">Jonas Carvalho</a></p>
+    </div>
+    <div class="foot-links">
+      <a href="https://github.com/jonascarvalh/bookshelf-app" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://openlibrary.org" target="_blank" rel="noopener noreferrer">Open Library</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // ── ISBN: mesma regra do app (lib/features/scanner/domain/isbn.dart) ──
+  const L = ['0001101','0011001','0010011','0111101','0100011','0110001','0101111','0111011','0110111','0001011'];
+  const G = ['0100111','0110011','0011011','0100001','0011101','0111001','0000101','0010001','0001001','0010111'];
+  const R = ['1110010','1100110','1101100','1000010','1011100','1001110','1010000','1000100','1001000','1110100'];
+  const PARITY = ['LLLLLL','LLGLGG','LLGGLG','LLGGGL','LGLLGG','LGGLLG','LGGGLL','LGLGLG','LGLGGL','LGGLGL'];
+
+  const input = document.getElementById('isbn-input');
+  const status = document.getElementById('isbn-status');
+  const math = document.getElementById('isbn-math');
+  const svg = document.getElementById('barcode');
+  const link = document.getElementById('deeplink');
+
+  const check13 = (d12) => {
+    const sum = [...d12].reduce((s, c, i) => s + Number(c) * (i % 2 ? 3 : 1), 0);
+    return (10 - (sum % 10)) % 10;
+  };
+  const valid10 = (c) => [...c].reduce((s, ch, i) => s + (ch === 'X' ? 10 : Number(ch)) * (10 - i), 0) % 11 === 0;
+
+  function analyse(raw) {
+    const code = raw.replace(/[\s-]/g, '').toUpperCase();
+    if (/^\d{9}[\dX]$/.test(code)) {
+      if (!valid10(code)) return { ok: false, msg: 'ISBN-10 com dígito verificador errado.' };
+      const d12 = '978' + code.slice(0, 9);
+      return { ok: true, isbn: code, ean: d12 + check13(d12), msg: 'ISBN-10 válido. O código de barras usa a forma de 13 dígitos.' };
+    }
+    if (!/^\d{13}$/.test(code)) return { ok: false, msg: code.length ? `Faltam dígitos: um ISBN tem 10 ou 13 (você digitou ${code.length}).` : 'Digite um ISBN.' };
+    const expected = check13(code.slice(0, 12));
+    if (!/^97[89]/.test(code)) return { ok: false, ean: code, msg: 'É um código de barras, mas não de livro: ISBN começa com 978 ou 979.' };
+    if (Number(code[12]) !== expected) return { ok: false, ean: code, msg: `Dígito verificador errado: deveria ser ${expected}.` };
+    return { ok: true, isbn: code, ean: code, msg: 'ISBN-13 válido. O app abriria este livro.' };
+  }
+
+  function drawBarcode(ean) {
+    const digits = [...ean].map(Number);
+    const p = PARITY[digits[0]];
+    const left = digits.slice(1, 7).map((d, i) => (p[i] === 'L' ? L : G)[d]).join('');
+    const right = digits.slice(7).map((d) => R[d]).join('');
+    const bits = '101' + left + '01010' + right + '101';
+    const guards = new Set([0,1,2,45,46,47,48,49,92,93,94]);
+    let rects = '';
+    for (let i = 0; i < bits.length; i++) {
+      if (bits[i] !== '1') continue;
+      const h = guards.has(i) ? 56 : 50;
+      rects += `<rect x="${9 + i}" y="2" width="1" height="${h}" fill="var(--bar)"/>`;
+    }
+    const t = (x, s) => `<text x="${x}" y="64" font-family="IBM Plex Mono, monospace" font-size="8" fill="var(--bar)" text-anchor="middle">${s}</text>`;
+    svg.innerHTML = rects + t(4, ean[0]) + t(9 + 3 + 21, ean.slice(1, 7)) + t(9 + 50 + 21, ean.slice(7));
+  }
+
+  function render() {
+    const r = analyse(input.value);
+    status.className = 'isbn-status ' + (r.ok ? 'ok' : 'bad');
+    status.textContent = (r.ok ? '✓ ' : '✕ ') + r.msg;
+    if (r.ean) {
+      drawBarcode(r.ean);
+      const d = [...r.ean.slice(0, 12)];
+      const terms = d.map((c, i) => `${c}×${i % 2 ? 3 : 1}`).join(' + ');
+      const sum = d.reduce((s, c, i) => s + Number(c) * (i % 2 ? 3 : 1), 0);
+      math.innerHTML = `${terms} = ${sum} → dígito <mark>${(10 - (sum % 10)) % 10}</mark>`;
+    } else {
+      svg.innerHTML = '';
+      math.textContent = 'Pesos alternados 1 e 3; o último dígito completa a soma até a próxima dezena.';
+    }
+    link.textContent = 'estante://app/isbn/' + (r.ok ? r.isbn : '…');
+  }
+
+  input.addEventListener('input', render);
+  document.querySelectorAll('[data-isbn]').forEach((b) =>
+    b.addEventListener('click', () => { input.value = b.dataset.isbn; render(); input.focus(); }));
+  document.getElementById('copy-link').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    navigator.clipboard.writeText(link.textContent).then(
+      () => { btn.textContent = 'Copiado'; setTimeout(() => (btn.textContent = 'Copiar'), 1600); },
+      () => { const s = getSelection(); const r = document.createRange(); r.selectNodeContents(link); s.removeAllRanges(); s.addRange(r); });
+  });
+  render();
+
+  // ── Simulador do repositório offline-first ──
+  const SCENARIOS = {
+    fresh: [
+      ['0 ms', 'cache', 'Lista aparece na hora, vinda do banco do aparelho.'],
+      ['—', 'nada', 'Nenhuma requisição: a busca foi salva há menos de 30 minutos.'],
+    ],
+    stale: [
+      ['0 ms', 'cache', 'Lista salva aparece na hora, com uma barra fina de atualização no topo.'],
+      ['~400 ms', 'api', 'Chega a resposta nova; o banco é atualizado e a lista troca sem piscar.'],
+    ],
+    offline: [
+      ['0 ms', 'cache', 'Lista salva aparece, com a etiqueta "Salvo em 24 de out.".'],
+      ['0 ms', 'nada', 'Faixa "Sem internet" acima das abas. O app nem tenta a rede.'],
+    ],
+    down: [
+      ['0 ms', 'cache', 'Lista salva aparece enquanto o app tenta atualizar.'],
+      ['~0,6 s', 'erro', 'Erro 503. Espera 600 ms e tenta de novo.'],
+      ['~1,8 s', 'erro', 'Erro 503 outra vez. Espera 1,2 s para a última tentativa.'],
+      ['~2,2 s', 'cache', 'Desiste e mantém a lista salva, avisando que os resultados são antigos.'],
+    ],
+    first: [
+      ['0 ms', 'erro', '"Você está sem internet." com o botão Tentar novamente.'],
+      ['—', 'nada', 'Quando a conexão volta, a faixa some e um toque refaz a busca.'],
+    ],
+  };
+  const LABEL = { cache: 'cache', api: 'API', erro: 'erro', nada: '—' };
+  const timeline = document.getElementById('timeline');
+  const buttons = document.querySelectorAll('.scenario');
+  function show(key) {
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.s === key)));
+    timeline.innerHTML = SCENARIOS[key].map(([t, o, text]) =>
+      `<li><time>${t}</time><span class="origin ${o}">${LABEL[o]}</span><p>${text}</p></li>`).join('');
+  }
+  buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.s)));
+  show('fresh');
+})();
+</script>
+</body>
+</html>

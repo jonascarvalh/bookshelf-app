@@ -1,0 +1,33 @@
+{
+ "numFound": 1,
+ "start": 0,
+ "numFoundExact": true,
+ "num_found": 1,
+ "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+ "q": "",
+ "offset": null,
+ "docs": [
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 647501,
+   "first_publish_year": 1900,
+   "isbn": [
+    "9788500507007",
+    "9781521761007",
+    "9780140448368"
+   ],
+   "key": "/works/OL1003040W",
+   "number_of_pages_median": 268,
+   "title": "Dom Casmurro",
+   "subject": [
+    "Religious",
+    "Fiction",
+    "Reminiscing in old age",
+    "Adultery",
+    "Authorship"
+   ]
+  }
+ ]
+}

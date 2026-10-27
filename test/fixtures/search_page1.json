@@ -1,0 +1,351 @@
+{
+ "numFound": 1406,
+ "start": 0,
+ "numFoundExact": true,
+ "num_found": 1406,
+ "documentation_url": "https://openlibrary.org/dev/docs/api/search",
+ "q": "machado de assis",
+ "offset": null,
+ "docs": [
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 647501,
+   "first_publish_year": 1900,
+   "isbn": [
+    "9788500507007",
+    "9781521761007",
+    "9780140448368"
+   ],
+   "key": "/works/OL1003040W",
+   "number_of_pages_median": 268,
+   "title": "Dom Casmurro",
+   "subject": [
+    "Religious",
+    "Fiction",
+    "Reminiscing in old age",
+    "Adultery",
+    "Authorship"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 123152,
+   "first_publish_year": 1881,
+   "isbn": [
+    "3717520180",
+    "9780195101706",
+    "9681676807"
+   ],
+   "key": "/works/OL1003017W",
+   "number_of_pages_median": 242,
+   "title": "Memórias póstumas de Brás Cubas",
+   "subject": [
+    "Romance brasileiro",
+    "Continental european fiction (fictional works by one author)",
+    "Social life and customs",
+    "Dead",
+    "Fiction"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 647504,
+   "first_publish_year": 1981,
+   "isbn": [
+    "1983274917",
+    "1603848533",
+    "9781520119571"
+   ],
+   "key": "/works/OL1003134W",
+   "number_of_pages_median": 100,
+   "title": "O Alienista",
+   "subject": [
+    "conto",
+    "Fiction, general",
+    "Language and languages, study and teaching",
+    "Fiction",
+    "Social life and customs"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 123420,
+   "first_publish_year": 1899,
+   "isbn": [
+    "8508040849",
+    "9781973422235",
+    "2864240807"
+   ],
+   "key": "/works/OL1003079W",
+   "number_of_pages_median": 270,
+   "title": "Quincas Borba",
+   "subject": [
+    "Fiction",
+    "History",
+    "Continental european fiction (fictional works by one author)",
+    "Fiction, general",
+    "Language and languages, study and teaching"
+   ]
+  },
+  {
+   "author_name": [
+    "Augusto Meyer"
+   ],
+   "first_publish_year": 1935,
+   "isbn": [
+    "9788570632890",
+    "8570632894"
+   ],
+   "key": "/works/OL1757130W",
+   "number_of_pages_median": 114,
+   "title": "Machado de Assis ..",
+   "subject": [
+    "Criticism and interpretation"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 8793690,
+   "first_publish_year": 2019,
+   "isbn": [
+    "9781631495984",
+    "1631495984"
+   ],
+   "key": "/works/OL20149487W",
+   "number_of_pages_median": 320,
+   "title": "Machado de Assis"
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "first_publish_year": 1999,
+   "isbn": [
+    "8586311243",
+    "9788586311246"
+   ],
+   "key": "/works/OL1003023W",
+   "number_of_pages_median": 63,
+   "title": "A cartomante"
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 10737739,
+   "first_publish_year": 1952,
+   "isbn": [
+    "9798678494603",
+    "1521800944",
+    "9798632678308"
+   ],
+   "key": "/works/OL1003145W",
+   "number_of_pages_median": 194,
+   "title": "Casa velha"
+  },
+  {
+   "author_name": [
+    "John Gledson"
+   ],
+   "first_publish_year": 1986,
+   "key": "/works/OL4998532W",
+   "number_of_pages_median": 262,
+   "title": "Machado de Assis, ficção e história",
+   "subject": [
+    "Criticism and interpretation"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 2664648,
+   "first_publish_year": 1899,
+   "isbn": [
+    "9780813161914",
+    "9780813194325",
+    "0813161916"
+   ],
+   "key": "/works/OL1003047W",
+   "number_of_pages_median": 198,
+   "title": "Iaiá Garcia (Classicos Da Literatura Brasileira)",
+   "subject": [
+    "Brazil in fiction",
+    "Fiction",
+    "Fiction, general",
+    "Brazil, fiction"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis",
+    "John Temple Graves"
+   ],
+   "cover_i": 2664649,
+   "first_publish_year": 1908,
+   "isbn": [
+    "1790273439",
+    "9788572326254",
+    "9789727950591"
+   ],
+   "key": "/works/OL1003053W",
+   "number_of_pages_median": 196,
+   "title": "Memorial de Aires (Classicos Da Literatura Brasileira)",
+   "subject": [
+    "Fiction, general",
+    "Language and languages, study and teaching",
+    "Brazil in fiction",
+    "Fiction",
+    "Brazil, fiction"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis",
+    "Helen Caldwell"
+   ],
+   "cover_i": 6948484,
+   "first_publish_year": 1929,
+   "isbn": [
+    "9798618210928",
+    "9788477690511",
+    "9780520048126"
+   ],
+   "key": "/works/OL1003152W",
+   "number_of_pages_median": 221,
+   "title": "Helena",
+   "subject": [
+    "Fiction, romance, general",
+    "Romance literature"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "first_publish_year": 1960,
+   "isbn": [
+    "9788572322034",
+    "8572322035"
+   ],
+   "key": "/works/OL1003142W",
+   "number_of_pages_median": 108,
+   "title": "Machado de Assis"
+  },
+  {
+   "author_name": [
+    "Agrippino Grieco"
+   ],
+   "cover_i": 15009880,
+   "first_publish_year": 1959,
+   "key": "/works/OL4334245W",
+   "number_of_pages_median": 367,
+   "title": "Machado de Assis"
+  },
+  {
+   "author_name": [
+    "Machado DE ASSIS",
+    "Lucas Kauan SANTOS",
+    "Machado de Assis"
+   ],
+   "first_publish_year": 2020,
+   "isbn": [
+    "6589968489",
+    "9798677870620",
+    "9798545661534"
+   ],
+   "key": "/works/OL35865716W",
+   "title": "Memórias Póstumas de Brás Cubas"
+  },
+  {
+   "author_name": [
+    "Machado de Assis",
+    "Helen Caldwell",
+    "John Temple Graves"
+   ],
+   "cover_i": 1600274,
+   "first_publish_year": 1899,
+   "isbn": [
+    "1549695592",
+    "9788520927472",
+    "172377684X"
+   ],
+   "key": "/works/OL1003044W",
+   "number_of_pages_median": 276,
+   "title": "Esau e Jacó",
+   "subject": [
+    "Fiction",
+    "Politics and government",
+    "Sibling rivalry",
+    "Twins",
+    "Brothers, fiction"
+   ]
+  },
+  {
+   "author_name": [
+    "Lúcia Miguel Pereira"
+   ],
+   "first_publish_year": 1936,
+   "key": "/works/OL3710110W",
+   "number_of_pages_median": 326,
+   "title": "Machado de Assis",
+   "subject": [
+    "Biography",
+    "Brazilian Authors"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "cover_i": 9606114,
+   "first_publish_year": 1963,
+   "key": "/works/OL1003136W",
+   "number_of_pages_median": 147,
+   "title": "The psychiatrist, and other stories",
+   "subject": [
+    "Social life and customs",
+    "Translations into English",
+    "Fiction",
+    "Manners and customs",
+    "Brazilian Short stories"
+   ]
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "first_publish_year": 2021,
+   "isbn": [
+    "9798544968412",
+    "9798548932082",
+    "9798548712998"
+   ],
+   "key": "/works/OL36237516W",
+   "title": "O Alienista"
+  },
+  {
+   "author_name": [
+    "Machado de Assis"
+   ],
+   "first_publish_year": 2020,
+   "isbn": [
+    "9798716868595",
+    "9798664807783",
+    "9798559443157"
+   ],
+   "key": "/works/OL34369144W",
+   "title": "Memórias Póstumas de Brás Cubas"
+  }
+ ]
+}

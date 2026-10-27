@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  analyze-and-test:
+    name: Análise e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Instalar SQLite (banco em memória nos testes)
+        run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
+
+      - name: Dependências e código gerado
+        run: |
+          flutter pub get
+          dart run build_runner build
+
+      # Em caso de falha, o resultado também aparece como anotação no resumo do workflow.
+      - name: Análise estática
+        run: |
+          if ! flutter analyze > analyze.txt 2>&1; then
+            cat analyze.txt
+            echo "::error title=flutter analyze::$(tail -c 60000 analyze.txt | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')"
+            exit 1
+          fi
+          cat analyze.txt
+
+      - name: Testes
+        run: |
+          if ! flutter test > test.txt 2>&1; then
+            cat test.txt
+            echo "::error title=flutter test::$(grep -v '^[0-9]*:[0-9]* +[0-9]*' test.txt | tail -c 60000 | sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g')"
+            exit 1
+          fi
+          tail -n 5 test.txt
+
+  integration:
+    name: Teste de integração (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependências do desktop Linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libsqlite3-dev xvfb
+
+      - name: Dependências e código gerado
+        run: |
+          flutter pub get
+          dart run build_runner build
+
+      # O app roda de verdade numa tela virtual, com a API simulada.
+      - name: Fluxo principal
+        run: xvfb-run -a flutter test integration_test -d linux
+
+  apk:
+    name: APK
+    needs: [analyze-and-test, integration]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # para publicar a Release nas tags v*
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependências e código gerado
+        run: |
+          flutter pub get
+          dart run build_runner build
+
+      - name: Gerar APK
+        run: |
+          flutter build apk --release
+          cp build/app/outputs/flutter-apk/app-release.apk estante.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estante-apk
+          path: estante.apk
+
+      # Ao criar uma tag (ex.: v1.0.0), o APK vai para as Releases do GitHub.
+      - name: Publicar Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: estante.apk
+          generate_release_notes: true

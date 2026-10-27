@@ -1,0 +1,125 @@
+{
+ "numFound": 1406,
+ "start": 20,
+ "docs": [
+  {
+   "author_name": [
+    "Graciliano Ramos de Oliveira"
+   ],
+   "cover_i": 12369687,
+   "first_publish_year": 1964,
+   "isbn": [
+    "9500513749",
+    "9788501085290",
+    "6580210885"
+   ],
+   "key": "/works/OL2900596W",
+   "number_of_pages_median": 155,
+   "title": "Vidas secas",
+   "subject": [
+    "Illustrations",
+    "Seca in literature",
+    "Myth in literature",
+    "In literature",
+    "Literature"
+   ]
+  },
+  {
+   "author_name": [
+    "Graciliano Ramos"
+   ],
+   "cover_i": 14158825,
+   "first_publish_year": 1986,
+   "isbn": [
+    "8501005584",
+    "9788501114785",
+    "9786580210886"
+   ],
+   "key": "/works/OL31247718W",
+   "number_of_pages_median": 214,
+   "title": "Vidas Secas",
+   "subject": [
+    "Brazilian fiction",
+    "Brazilian fiction--20th century",
+    "Brazilian literature",
+    "Brazilian literature--fiction--20th century",
+    "Fiction"
+   ]
+  },
+  {
+   "author_name": [
+    "Graciliano Ramos de Oliveira"
+   ],
+   "first_publish_year": 1947,
+   "key": "/works/OL2900595W",
+   "number_of_pages_median": 166,
+   "title": "Vidas sêcas"
+  },
+  {
+   "author_name": [
+    "Graciliano Ramos de Oliveira"
+   ],
+   "cover_i": 4461279,
+   "first_publish_year": 1965,
+   "isbn": [
+    "0800869915",
+    "9780800869915",
+    "0720601843"
+   ],
+   "key": "/works/OL2900597W",
+   "number_of_pages_median": 194,
+   "title": "São Bernardo",
+   "subject": [
+    "Fiction"
+   ]
+  },
+  {
+   "author_name": [
+    "Graciliano Ramos de Oliveira"
+   ],
+   "first_publish_year": 1941,
+   "key": "/works/OL2900580W",
+   "number_of_pages_median": 307,
+   "title": "Angustia"
+  },
+  {
+   "author_name": [
+    "Graciliano Ramos"
+   ],
+   "cover_i": 14327298,
+   "first_publish_year": 1999,
+   "isbn": [
+    "8501054542",
+    "9788501054548",
+    "9781619654112"
+   ],
+   "key": "/works/OL29311795W",
+   "title": "A Terra dos Meninos Pelados"
+  },
+  {
+   "author_name": [
+    "Graciliano Ramos de Oliveira"
+   ],
+   "first_publish_year": 1953,
+   "isbn": [
+    "8501009113",
+    "9788501009111"
+   ],
+   "key": "/works/OL2900593W",
+   "number_of_pages_median": 243,
+   "title": "Angústia"
+  },
+  {
+   "author_name": [
+    "Paulo Mercadante"
+   ],
+   "first_publish_year": 1993,
+   "key": "/works/OL3424446W",
+   "number_of_pages_median": 167,
+   "title": "Graciliano Ramos",
+   "subject": [
+    "Intellectual life"
+   ]
+  }
+ ]
+}
